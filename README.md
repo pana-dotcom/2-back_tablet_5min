@@ -1,1 +1,1 @@
-# pana-dotcom-2-back_tablet_5min
+# 2-back_tablet_5min
