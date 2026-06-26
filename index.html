@@ -11,27 +11,29 @@ body {
     margin-top: 50px;
 }
 
-/* 共通表示エリア */
+/* ✅ 表示位置を完全固定 */
 #letter {
     font-size: 80px;
     height: 120px;
+    width: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 30px;
+    margin: 30px auto;
     line-height: 1;
-
-    /* ✅ 常に中央に固定 */
-    width: 120px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
-/* ✅ ×専用（位置は変えない） */
+/* ✅ ×専用スタイル */
 .fixation {
     color: white;
     background: gray;
     border-radius: 10px;
+}
+
+button {
+    font-size: 20px;
+    padding: 10px 20px;
+    margin: 10px;
 }
 </style>
 </head>
@@ -44,7 +46,7 @@ body {
 
 <div id="game" style="display:none;">
     <div id="letter">✖</div>
-    <p>2つ前の文字と一致時はEnterキーを押す</p>
+    <button onclick="response()">一致！</button>
 </div>
 
 <script>
@@ -55,13 +57,12 @@ let responded = false;
 
 let baseLetters = ["B","F","K","H","M","Q","R","T"];
 
-let timeLimit = 30;
+// ✅ 4分30秒
+let timeLimit = 270;
 let timeLeft = timeLimit;
 let gameTimer;
 
 let isRunning = false;
-
-let keyLocked = false;
 
 let letterDuration = 500;
 let fixationDuration = 2000;
@@ -76,6 +77,7 @@ startBtn.addEventListener("click", () => {
     startGame();
 });
 
+// ✅ 表示制御（ここが重要）
 function showFixation() {
     letterDiv.innerText = "✖";
     letterDiv.classList.add("fixation");
@@ -95,6 +97,7 @@ function startGame() {
 
     timeLeft = timeLimit;
 
+    // ✅ 強制終了タイマー
     gameTimer = setInterval(countDown, 1000);
 
     showFixation();
@@ -144,20 +147,6 @@ function nextTrial() {
     }, letterDuration);
 }
 
-document.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter") return;
-    if (keyLocked) return;
-
-    keyLocked = true;
-    response();
-});
-
-document.addEventListener("keyup", (e) => {
-    if (e.key === "Enter") {
-        keyLocked = false;
-    }
-});
-
 function response() {
     if (!isRunning) return;
     if (responded) return;
@@ -188,6 +177,8 @@ function evaluate(clicked) {
 }
 
 function endGame() {
+    if (!isRunning) return;
+
     isRunning = false;
     clearInterval(gameTimer);
 
