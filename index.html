@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>2-back Task</title>
+
 <style>
 body {
     font-family: Arial;
@@ -10,7 +11,7 @@ body {
     margin-top: 50px;
 }
 
-/* 中央固定 */
+/* 共通表示エリア */
 #letter {
     font-size: 80px;
     height: 120px;
@@ -19,12 +20,18 @@ body {
     justify-content: center;
     margin: 30px;
     line-height: 1;
+
+    /* ✅ 常に中央に固定 */
+    width: 120px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-button {
-    font-size: 20px;
-    padding: 10px 20px;
-    margin: 10px;
+/* ✅ ×専用（位置は変えない） */
+.fixation {
+    color: white;
+    background: gray;
+    border-radius: 10px;
 }
 </style>
 </head>
@@ -37,7 +44,7 @@ button {
 
 <div id="game" style="display:none;">
     <div id="letter">✖</div>
-    <button onclick="response()">一致！</button>
+    <p>2つ前の文字と一致時はEnterキーを押す</p>
 </div>
 
 <script>
@@ -46,25 +53,38 @@ let index = 0;
 let logs = [];
 let responded = false;
 
-let baseLetters = ["B","F","K","H","M","Q","R","X"];
+let baseLetters = ["B","F","K","H","M","Q","R","T"];
 
-let timeLimit = 270; // ✅ 内部でのみ使用（4分半）
+let timeLimit = 30;
 let timeLeft = timeLimit;
 let gameTimer;
 
 let isRunning = false;
+
+let keyLocked = false;
 
 let letterDuration = 500;
 let fixationDuration = 2000;
 
 const startBtn = document.getElementById("startBtn");
 const game = document.getElementById("game");
+const letterDiv = document.getElementById("letter");
 
 startBtn.addEventListener("click", () => {
     startBtn.style.display = "none";
     game.style.display = "block";
     startGame();
 });
+
+function showFixation() {
+    letterDiv.innerText = "✖";
+    letterDiv.classList.add("fixation");
+}
+
+function showStimulus(letter) {
+    letterDiv.innerText = letter;
+    letterDiv.classList.remove("fixation");
+}
 
 function startGame() {
     isRunning = true;
@@ -75,11 +95,9 @@ function startGame() {
 
     timeLeft = timeLimit;
 
-    // ✅ 見えないカウントダウン
     gameTimer = setInterval(countDown, 1000);
 
-    // ✅ ×から開始
-    document.getElementById("letter").innerText = "✖";
+    showFixation();
 
     setTimeout(() => {
         if (!isRunning) return;
@@ -105,7 +123,7 @@ function nextTrial() {
 
     sequence.push(letter);
 
-    document.getElementById("letter").innerText = letter;
+    showStimulus(letter);
     index++;
 
     setTimeout(() => {
@@ -116,7 +134,7 @@ function nextTrial() {
             evaluate(false);
         }
 
-        document.getElementById("letter").innerText = "✖";
+        showFixation();
 
         setTimeout(() => {
             if (!isRunning) return;
@@ -125,6 +143,20 @@ function nextTrial() {
 
     }, letterDuration);
 }
+
+document.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    if (keyLocked) return;
+
+    keyLocked = true;
+    response();
+});
+
+document.addEventListener("keyup", (e) => {
+    if (e.key === "Enter") {
+        keyLocked = false;
+    }
+});
 
 function response() {
     if (!isRunning) return;
@@ -159,7 +191,8 @@ function endGame() {
     isRunning = false;
     clearInterval(gameTimer);
 
-    document.getElementById("letter").innerText = "終了";
+    letterDiv.innerText = "終了";
+    letterDiv.classList.remove("fixation");
 
     exportCSV();
 }
