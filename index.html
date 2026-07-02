@@ -77,7 +77,7 @@ startBtn.addEventListener("click", () => {
     startGame();
 });
 
-// ✅ 表示制御（ここが重要）
+// ✅ 表示制御
 function showFixation() {
     letterDiv.innerText = "✖";
     letterDiv.classList.add("fixation");
@@ -97,7 +97,6 @@ function startGame() {
 
     timeLeft = timeLimit;
 
-    // ✅ 強制終了タイマー
     gameTimer = setInterval(countDown, 1000);
 
     showFixation();
@@ -117,69 +116,100 @@ function countDown() {
 }
 
 function nextTrial() {
+
     if (!isRunning) return;
 
     responded = false;
 
-    let base = baseLetters[Math.floor(Math.random() * baseLetters.length)];
-    let letter = Math.random() < 0.5 ? base.toLowerCase() : base;
+    let base =
+        baseLetters[Math.floor(Math.random() * baseLetters.length)];
+
+    let letter =
+        Math.random() < 0.5 ? base.toLowerCase() : base;
 
     sequence.push(letter);
 
     showStimulus(letter);
+
     index++;
 
+    /* 刺激提示 0.5秒 */
     setTimeout(() => {
 
         if (!isRunning) return;
 
-        if (!responded) {
-            evaluate(false);
-        }
-
         showFixation();
 
+        /* 注視点 2.0秒 */
         setTimeout(() => {
+
             if (!isRunning) return;
+
+            /* 合計2.5秒後に判定 */
+            if (!responded) {
+                evaluate(false);
+            }
+
             nextTrial();
+
         }, fixationDuration);
 
     }, letterDuration);
 }
 
 function response() {
+
     if (!isRunning) return;
     if (responded) return;
 
     responded = true;
+
     evaluate(true);
 }
 
 function evaluate(clicked) {
+
     if (index < 3) return;
 
     let current = sequence[index - 1];
     let back2 = sequence[index - 3];
 
-    let match = current.toLowerCase() === back2.toLowerCase();
+    let match =
+        current.toLowerCase() === back2.toLowerCase();
 
     let hit = 0;
     let miss = 0;
     let fa = 0;
     let cr = 0;
 
-    if (match && clicked) hit = 1;
-    else if (match && !clicked) miss = 1;
-    else if (!match && clicked) fa = 1;
-    else if (!match && !clicked) cr = 1;
+    if (match && clicked) {
+        hit = 1;
+    }
+    else if (match && !clicked) {
+        miss = 1;
+    }
+    else if (!match && clicked) {
+        fa = 1;
+    }
+    else if (!match && !clicked) {
+        cr = 1;
+    }
 
-    logs.push([logs.length + 1, hit, miss, fa, cr]);
+    logs.push([
+        logs.length + 1,
+        hit,
+        miss,
+        fa,
+        cr
+    ]);
 }
 
 function endGame() {
+
     if (!isRunning) return;
 
     isRunning = false;
+
     clearInterval(gameTimer);
 
     letterDiv.innerText = "終了";
@@ -189,28 +219,36 @@ function endGame() {
 }
 
 function exportCSV() {
-    let csv = "trial,Hit,Miss,FalseAlarm,CorrectRejection\n";
+
+    let csv =
+        "trial,Hit,Miss,FalseAlarm,CorrectRejection\n";
 
     logs.forEach(row => {
         csv += row.join(",") + "\n";
     });
 
-    let blob = new Blob([csv], { type: "text/csv" });
-    let link = document.createElement("a");
+    let blob =
+        new Blob([csv], { type: "text/csv" });
+
+    let link =
+        document.createElement("a");
 
     let now = new Date();
+
     let YYYY = now.getFullYear();
     let MM = String(now.getMonth() + 1).padStart(2,"0");
     let DD = String(now.getDate()).padStart(2,"0");
     let hh = String(now.getHours()).padStart(2,"0");
     let mm = String(now.getMinutes()).padStart(2,"0");
 
-    let filename = `n-back_${YYYY}${MM}${DD}_${hh}${mm}.csv`;
+    let filename =
+        `n-back_${YYYY}${MM}${DD}_${hh}${mm}.csv`;
 
     link.href = URL.createObjectURL(blob);
     link.download = filename;
     link.click();
 }
+
 </script>
 
 </body>
