@@ -11,7 +11,7 @@ body {
     margin-top: 50px;
 }
 
-/* ✅ 表示位置を完全固定 */
+/* 表示位置を完全固定 */
 #letter {
     font-size: 80px;
     height: 120px;
@@ -23,7 +23,7 @@ body {
     line-height: 1;
 }
 
-/* ✅ ×専用スタイル */
+/* ×専用スタイル */
 .fixation {
     color: white;
     background: gray;
@@ -50,6 +50,7 @@ button {
 </div>
 
 <script>
+
 let sequence = [];
 let index = 0;
 let logs = [];
@@ -57,7 +58,7 @@ let responded = false;
 
 let baseLetters = ["B","F","K","H","M","Q","R","T"];
 
-// ✅ 4分30秒
+// 4分30秒
 let timeLimit = 270;
 let timeLeft = timeLimit;
 let gameTimer;
@@ -77,7 +78,7 @@ startBtn.addEventListener("click", () => {
     startGame();
 });
 
-// ✅ 表示制御
+// 表示制御
 function showFixation() {
     letterDiv.innerText = "✖";
     letterDiv.classList.add("fixation");
@@ -89,6 +90,7 @@ function showStimulus(letter) {
 }
 
 function startGame() {
+
     isRunning = true;
 
     sequence = [];
@@ -108,6 +110,7 @@ function startGame() {
 }
 
 function countDown() {
+
     timeLeft--;
 
     if (timeLeft <= 0) {
@@ -121,10 +124,63 @@ function nextTrial() {
 
     responded = false;
 
-    let base =
-        baseLetters[Math.floor(Math.random() * baseLetters.length)];
+    let base;
+    let letter;
 
-    let letter =
+    /*
+    最初の2試行は2-back判定ができないため、
+    8文字からランダムに選択
+    */
+    if (sequence.length < 2) {
+
+        base =
+            baseLetters[
+                Math.floor(Math.random() * baseLetters.length)
+            ];
+
+    } else {
+
+        /*
+        3試行目以降は、各試行で独立に
+        25%の確率でターゲットを設定
+        */
+        let makeTarget = Math.random() < 0.25;
+
+        /*
+        2試行前の文字を取得
+        大文字・小文字は区別しない
+        */
+        let back2 =
+            sequence[sequence.length - 2].toUpperCase();
+
+        if (makeTarget) {
+
+            /*
+            ターゲットの場合：
+            2試行前と同じ文字を提示
+            */
+            base = back2;
+
+        } else {
+
+            /*
+            非ターゲットの場合：
+            2試行前と同じ文字を候補から除外
+            */
+            let candidates =
+                baseLetters.filter(item => item !== back2);
+
+            base =
+                candidates[
+                    Math.floor(Math.random() * candidates.length)
+                ];
+        }
+    }
+
+    /*
+    大文字・小文字を50%ずつで決定
+    */
+    letter =
         Math.random() < 0.5 ? base.toLowerCase() : base;
 
     sequence.push(letter);
